@@ -30,20 +30,11 @@ type Delegation @entity {
     validationID: Bytes!
     owner: Bytes!
     weight: BigInt!
+    status: DelegatorStatus!
     startedAt: Timestamp
     endTime: Timestamp
-    status: DelegatorStatus!
-}
-
-type DelegationNFT @entity {
-    id: Bytes!
-    validationID: Bytes!
-    owner: Bytes!
-    weight: BigInt!
-    startedAt: Timestamp
-    endTime: Timestamp
-    status: DelegatorStatus!
-    tokenIDs: [BigInt!]!
+    # none if the delegation is a regular delegation (not NFT delegation)
+    tokenIDs: [BigInt!]
 }
 
 type UptimeUpdate @entity {
@@ -51,9 +42,4 @@ type UptimeUpdate @entity {
     validationID: Bytes!
     uptimeSeconds: BigInt!
     epoch: BigInt!
-}
-
-type ValidatorWeight @entity {
-    id: Bytes!
-    weight: BigInt!
 }
