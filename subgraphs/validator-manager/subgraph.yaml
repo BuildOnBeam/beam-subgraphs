@@ -8,10 +8,10 @@ indexerHints:
 dataSources:
   - kind: ethereum/contract
     name: ValidatorManager
-    network: beam
+    network: beamsandbox
     source:
       abi: ValidatorManager
-      address: "0x0000000000000000000000000000000000000000" # To be updated
+      address: "0xfacade0000000000000000000000000000000000" # To be updated
       startBlock: 1
     mapping:
       kind: ethereum/events
@@ -37,10 +37,10 @@ dataSources:
   
   - kind: ethereum/contract
     name: Native721TokenStakingManager
-    network: beam
+    network: beamsandbox
     source:
       abi: Native721TokenStakingManager
-      address: "0x0000000000000000000000000000000000000000" # To be updated
+      address: "0x5aFf8556344baDbAF3a48a7e75eF89990b00a60e" # To be updated
       startBlock: 1
     mapping:
       kind: ethereum/events
