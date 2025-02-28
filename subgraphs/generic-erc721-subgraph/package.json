@@ -1,21 +1,26 @@
 {
   "name": "generic-erc721-subgraph",
-  "license": "MIT",
+  "private": true,
+  "version": "1.0.0",
+  "license": "GPL-3.0-or-later",
   "scripts": {
-    "prepare:arbitrum": "mustache config/arbitrum.json subgraph.template.yaml > subgraph.yaml && graph codegen",
-    "codegen": "graph codegen",
-    "build": "graph build",
-    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ generic-erc721-subgraph",
-    "create-local": "graph create --node http://localhost:8020/ generic-erc721-subgraph",
-    "remove-local": "graph remove --node http://localhost:8020/ generic-erc721-subgraph",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 generic-erc721-subgraph"
-  },
-  "dependencies": {
-    "@graphprotocol/graph-cli": "0.67.1",
-    "@graphprotocol/graph-ts": "0.32.0"
+    "all": "yarn codegen && yarn build && yarn index && yarn deploy",
+    "prepare": "mustache network/beam.json subgraph.template.yaml > subgraph.yaml",
+    "codegen": "yarn prepare; graph codegen --output-dir src/types/",
+    "build": "yarn prepare; graph build",
+    "index": "yarn prepare; graph create erc721 --node http://GRAPH_NODE:8020",
+    "deploy": "yarn prepare; graph deploy erc721 --node http://GRAPH_NODE:8020 --ipfs https://ipfs.sphere.market",
+    "all:test": "yarn codegen:test && yarn build:test && yarn index:test && yarn deploy:test",
+    "prepare:test": "mustache network/beam-testnet.json subgraph.template.yaml > subgraph.yaml",
+    "codegen:test": "yarn prepare:test; graph codegen --output-dir src/types/",
+    "build:test": "yarn prepare:test; graph build",
+    "index:test": "yarn prepare:test; graph create erc721-testnet --node http://GRAPH_NODE:8020",
+    "deploy:test": "yarn prepare:test; graph deploy erc721-testnet --node http://GRAPH_NODE:8020 --ipfs https://ipfs.sphere.market"
   },
   "devDependencies": {
+    "@graphprotocol/graph-cli": "0.67.1",
+    "@graphprotocol/graph-ts": "0.32.0",
     "matchstick-as": "0.5.0",
-    "mustache": "^4.2.0"
+     "mustache": "^4.2.0"
   }
 }
