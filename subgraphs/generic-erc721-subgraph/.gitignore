@@ -1,0 +1,7 @@
+node_modules/
+generated/
+build/
+src/types/
+.DS_STORE
+yarn-error.log
+subgraph.yaml
