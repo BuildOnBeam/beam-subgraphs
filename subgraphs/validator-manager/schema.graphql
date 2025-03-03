@@ -43,3 +43,20 @@ type UptimeUpdate @entity {
     uptimeSeconds: BigInt!
     epoch: BigInt!
 }
+
+type RegisteredRewards @entity {
+    id: Bytes!
+    epoch: BigInt!
+    primary: Boolean!
+    tokens: [Bytes!]
+    amounts: [BigInt!]
+}
+
+type ClaimedRewards @entity {
+    id: Bytes!
+    epoch: BigInt!
+    primary: Boolean!
+    account: Bytes!
+    tokens: [Bytes!]
+    amounts: [BigInt!]
+}
