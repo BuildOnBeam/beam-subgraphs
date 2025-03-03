@@ -67,4 +67,10 @@ dataSources:
           handler: handleDelegatedNFTs
         - event: UptimeUpdated(indexed bytes32,uint64,uint64)
           handler: handleUptimeUpdated
+        - event: RewardClaimed(bool,uint64,address,address,uint256)
+          handler: handleRewardClaimed
+        - event: RewardRegistered(bool,uint64,address,uint256)
+          handler: handleRewardRegistered
+        - event: RewardCancelled(bool,uint64,address)
+          handler: handleRewardCancelled
       file: ./src/mapping.ts

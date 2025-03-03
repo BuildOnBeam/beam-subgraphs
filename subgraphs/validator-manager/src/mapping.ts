@@ -11,12 +11,17 @@ import {
     CompletedDelegatorRegistration,
     CompletedDelegatorRemoval,
     DelegatedNFTs,
-    UptimeUpdated
+    UptimeUpdated,
+    RewardClaimed,
+    RewardRegistered,
+    RewardCancelled
 } from '../generated/Native721TokenStakingManager/Native721TokenStakingManager'
 import { 
     Validation,
     Delegation,
     UptimeUpdate,
+    RegisteredRewards,
+    ClaimedRewards
 } from '../generated/schema'
 import { Bytes, BigInt } from '@graphprotocol/graph-ts'
 
@@ -113,6 +118,82 @@ export function handleUptimeUpdated(event: UptimeUpdated): void {
     entity.save()
 }
 
+
+export function handleRewardClaimed(event: RewardClaimed): void {
+    let entity = getOrCreateClaimedRewads(
+        event.params.account
+        .concatI32(event.params.epoch.toI32())
+        .concatI32(event.params.primary ? 1 : 0)
+    )
+
+    entity.epoch = event.params.epoch
+    entity.primary = event.params.primary
+    entity.account = event.params.account
+
+    var present = false
+    for(var i=0; i<entity.tokens!.length; i++){
+        if(entity.tokens![i] == event.params.token){
+            entity.amounts![i] = entity.amounts![i].plus(event.params.amount)
+            present = true
+            break
+        }
+    }
+
+    if(!present){
+        entity.tokens!.push(event.params.token)
+        entity.amounts!.push(event.params.amount)
+    }
+
+    entity.save()
+}
+
+export function handleRewardRegistered(event: RewardRegistered): void {
+    let entity = getOrCreateRegisteredRewads(
+        Bytes.empty()
+        .concatI32(event.params.epoch.toI32())
+        .concatI32(event.params.primary ? 1 : 0)
+    )
+
+    entity.epoch = event.params.epoch
+    entity.primary = event.params.primary
+
+    var present = false
+    for(var i=0; i<entity.tokens!.length; i++){
+        if(entity.tokens![i] == event.params.token){
+            entity.amounts![i] = entity.amounts![i].plus(event.params.amount)
+            present = true
+            break
+        }
+    }
+
+    if(!present){
+        entity.tokens!.push(event.params.token)
+        entity.amounts!.push(event.params.amount)
+    }
+
+    entity.save()
+}
+
+export function handleRewardCancelled(event: RewardCancelled): void {
+    let entity = getOrCreateRegisteredRewads(
+        Bytes.empty()
+        .concatI32(event.params.epoch.toI32())
+        .concatI32(event.params.primary ? 1 : 0)
+    )
+
+    entity.epoch = event.params.epoch
+    entity.primary = event.params.primary
+
+    for(var i=0; i<entity.tokens!.length; i++){
+        if(entity.tokens![i] == event.params.token){
+            entity.amounts![i] = BigInt.zero()
+            break
+        }
+    }
+
+    entity.save()
+}
+
 // helper funcfions
 function getOrCreateValidation(id: Bytes): Validation {
     let entity = Validation.load(id)
@@ -133,6 +214,31 @@ function getOrCreateDelegation(id: Bytes): Delegation {
         entity.owner = Bytes.empty()
         entity.weight = BigInt.zero()
         entity.status = "Unknown"
+    }
+    return entity;
+}
+
+function getOrCreateClaimedRewads(id: Bytes): ClaimedRewards {
+    let entity = ClaimedRewards.load(id)
+    if (entity == null) {
+        entity = new ClaimedRewards(id)
+        entity.epoch = BigInt.zero()
+        entity.primary = true
+        entity.account = Bytes.empty()
+        entity.tokens = []
+        entity.amounts = []
+    }
+    return entity;
+}
+
+function getOrCreateRegisteredRewads(id: Bytes): RegisteredRewards {
+    let entity = RegisteredRewards.load(id)
+    if (entity == null) {
+        entity = new RegisteredRewards(id)
+        entity.epoch = BigInt.zero()
+        entity.primary = true
+        entity.tokens = []
+        entity.amounts = []
     }
     return entity;
 }

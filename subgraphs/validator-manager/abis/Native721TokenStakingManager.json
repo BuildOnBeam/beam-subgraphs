@@ -64,6 +64,19 @@
   },
   {
     "type": "function",
+    "name": "REWARD_CLAIM_DELAY",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint64",
+        "internalType": "uint64"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "STAKING_MANAGER_STORAGE_LOCATION",
     "inputs": [],
     "outputs": [
@@ -100,6 +113,57 @@
       }
     ],
     "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "cancelRewards",
+    "inputs": [
+      {
+        "name": "primary",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "epoch",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "token",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "claimRewards",
+    "inputs": [
+      {
+        "name": "primary",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "epoch",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "tokens",
+        "type": "address[]",
+        "internalType": "address[]"
+      },
+      {
+        "name": "recipient",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
   },
   {
     "type": "function",
@@ -203,6 +267,35 @@
   },
   {
     "type": "function",
+    "name": "getRewards",
+    "inputs": [
+      {
+        "name": "primary",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "epoch",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "tokens",
+        "type": "address[]",
+        "internalType": "address[]"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256[]",
+        "internalType": "uint256[]"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "initialize",
     "inputs": [
       {
@@ -269,16 +362,6 @@
             "name": "epochDuration",
             "type": "uint64",
             "internalType": "uint64"
-          },
-          {
-            "name": "balanceTracker",
-            "type": "address",
-            "internalType": "contract IBalanceTracker"
-          },
-          {
-            "name": "balanceTrackerNFT",
-            "type": "address",
-            "internalType": "contract IBalanceTracker"
           }
         ]
       },
@@ -341,16 +424,6 @@
         "name": "delegationID",
         "type": "bytes32",
         "internalType": "bytes32"
-      },
-      {
-        "name": "includeUptimeProof",
-        "type": "bool",
-        "internalType": "bool"
-      },
-      {
-        "name": "messageIndex",
-        "type": "uint32",
-        "internalType": "uint32"
       }
     ],
     "outputs": [],
@@ -522,17 +595,25 @@
   },
   {
     "type": "function",
+    "name": "owner",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "registerNFTDelegation",
     "inputs": [
       {
         "name": "validationID",
         "type": "bytes32",
         "internalType": "bytes32"
-      },
-      {
-        "name": "delegatorAddress",
-        "type": "address",
-        "internalType": "address"
       },
       {
         "name": "tokenIDs",
@@ -559,21 +640,46 @@
         "internalType": "bytes32"
       },
       {
-        "name": "includeUptimeProof",
-        "type": "bool",
-        "internalType": "bool"
-      },
-      {
-        "name": "messageIndex",
-        "type": "uint32",
-        "internalType": "uint32"
-      },
-      {
         "name": "nextValidationID",
         "type": "bytes32",
         "internalType": "bytes32"
       }
     ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "registerRewards",
+    "inputs": [
+      {
+        "name": "primary",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "epoch",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "token",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "renounceOwnership",
+    "inputs": [],
     "outputs": [],
     "stateMutability": "nonpayable"
   },
@@ -603,6 +709,37 @@
         "name": "messageIndex",
         "type": "uint32",
         "internalType": "uint32"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "submitUptimeProofs",
+    "inputs": [
+      {
+        "name": "validationIDs",
+        "type": "bytes32[]",
+        "internalType": "bytes32[]"
+      },
+      {
+        "name": "messageIndexes",
+        "type": "uint32[]",
+        "internalType": "uint32[]"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "transferOwnership",
+    "inputs": [
+      {
+        "name": "newOwner",
+        "type": "address",
+        "internalType": "address"
       }
     ],
     "outputs": [],
@@ -823,6 +960,118 @@
   },
   {
     "type": "event",
+    "name": "OwnershipTransferred",
+    "inputs": [
+      {
+        "name": "previousOwner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "newOwner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RewardCancelled",
+    "inputs": [
+      {
+        "name": "primary",
+        "type": "bool",
+        "indexed": false,
+        "internalType": "bool"
+      },
+      {
+        "name": "epoch",
+        "type": "uint64",
+        "indexed": false,
+        "internalType": "uint64"
+      },
+      {
+        "name": "token",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RewardClaimed",
+    "inputs": [
+      {
+        "name": "primary",
+        "type": "bool",
+        "indexed": false,
+        "internalType": "bool"
+      },
+      {
+        "name": "epoch",
+        "type": "uint64",
+        "indexed": false,
+        "internalType": "uint64"
+      },
+      {
+        "name": "account",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      },
+      {
+        "name": "token",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RewardRegistered",
+    "inputs": [
+      {
+        "name": "primary",
+        "type": "bool",
+        "indexed": false,
+        "internalType": "bool"
+      },
+      {
+        "name": "epoch",
+        "type": "uint64",
+        "indexed": false,
+        "internalType": "uint64"
+      },
+      {
+        "name": "token",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
     "name": "UptimeUpdated",
     "inputs": [
       {
@@ -897,13 +1146,24 @@
   },
   {
     "type": "error",
-    "name": "InvalidEpoch",
+    "name": "InvalidInitialization",
     "inputs": []
   },
   {
     "type": "error",
-    "name": "InvalidInitialization",
-    "inputs": []
+    "name": "InvalidInputLengths",
+    "inputs": [
+      {
+        "name": "inputLength1",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "inputLength2",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
   },
   {
     "type": "error",
@@ -1038,8 +1298,62 @@
   },
   {
     "type": "error",
+    "name": "OwnableInvalidOwner",
+    "inputs": [
+      {
+        "name": "owner",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "OwnableUnauthorizedAccount",
+    "inputs": [
+      {
+        "name": "account",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
     "name": "ReentrancyGuardReentrantCall",
     "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "TooEarly",
+    "inputs": [
+      {
+        "name": "actualTime",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "expectedTime",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "TooLate",
+    "inputs": [
+      {
+        "name": "actualTime",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "expectedTime",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
   },
   {
     "type": "error",
@@ -1100,11 +1414,6 @@
         "internalType": "bytes32"
       }
     ]
-  },
-  {
-    "type": "error",
-    "name": "ZeroDelegatorAddress",
-    "inputs": []
   },
   {
     "type": "error",
