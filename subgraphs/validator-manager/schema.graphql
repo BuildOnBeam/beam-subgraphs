@@ -19,6 +19,7 @@ enum DelegatorStatus {
 type Validation @entity {
     id: Bytes!
     nodeID: Bytes!
+    owner: Bytes!
     weight: BigInt!
     status: ValidatorStatus!
     startedAt: Timestamp

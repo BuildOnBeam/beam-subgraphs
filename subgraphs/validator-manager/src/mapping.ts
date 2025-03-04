@@ -30,6 +30,7 @@ export function handleInitiatedValidatorRegistration(event: InitiatedValidatorRe
     let entity = getOrCreateValidation(event.params.validationID)
 
     entity.nodeID = event.params.nodeID
+    entity.owner = event.transaction.from
     entity.weight = event.params.weight
     entity.status = "PendingAdded"
     entity.save()
