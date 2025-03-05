@@ -11,8 +11,8 @@
   },
   "beam-testnet": {
     "Native721TokenStakingManager": {
-      "address": "0x5dA022feB7b9f1f39e649CDed27090D00630a41D",
-      "startBlock": 1186037
+      "address": "0xF4B5869AabE19a106C0df25E1537d855b54EEcBD",
+      "startBlock": 1202462
     },
     "ValidatorManager": {
       "address": "0x33B9785E20ec582d5009965FB3346F1716e8A423",
