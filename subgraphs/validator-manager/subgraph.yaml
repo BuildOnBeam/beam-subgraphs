@@ -40,8 +40,8 @@ dataSources:
     network: beam-testnet
     source:
       abi: Native721TokenStakingManager
-      address: "0x5dA022feB7b9f1f39e649CDed27090D00630a41D"
-      startBlock: 1186037
+      address: "0xF4B5869AabE19a106C0df25E1537d855b54EEcBD"
+      startBlock: 1202462
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
