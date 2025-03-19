@@ -283,6 +283,11 @@
         "name": "tokens",
         "type": "address[]",
         "internalType": "address[]"
+      },
+      {
+        "name": "account",
+        "type": "address",
+        "internalType": "address"
       }
     ],
     "outputs": [
@@ -437,11 +442,6 @@
         "name": "delegationID",
         "type": "bytes32",
         "internalType": "bytes32"
-      },
-      {
-        "name": "messageIndex",
-        "type": "uint32",
-        "internalType": "uint32"
       },
       {
         "name": "validationID",
@@ -698,6 +698,32 @@
   },
   {
     "type": "function",
+    "name": "resolveRewards",
+    "inputs": [
+      {
+        "name": "delegationIDs",
+        "type": "bytes32[]",
+        "internalType": "bytes32[]"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setEpochOffset",
+    "inputs": [
+      {
+        "name": "epochOffset",
+        "type": "uint64",
+        "internalType": "uint64"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "submitUptimeProof",
     "inputs": [
       {
@@ -747,6 +773,32 @@
   },
   {
     "type": "function",
+    "name": "unlockDelegator",
+    "inputs": [
+      {
+        "name": "delegationID",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "unlockValidator",
+    "inputs": [
+      {
+        "name": "validationID",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "valueToWeight",
     "inputs": [
       {
@@ -763,25 +815,6 @@
       }
     ],
     "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "valueToWeightNFT",
-    "inputs": [
-      {
-        "name": "value",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint64",
-        "internalType": "uint64"
-      }
-    ],
-    "stateMutability": "pure"
   },
   {
     "type": "function",
@@ -1066,6 +1099,51 @@
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RewardResolved",
+    "inputs": [
+      {
+        "name": "delegationID",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "epoch",
+        "type": "uint64",
+        "indexed": false,
+        "internalType": "uint64"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "UnlockedDelegation",
+    "inputs": [
+      {
+        "name": "delegationID",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "UnlockedValidation",
+    "inputs": [
+      {
+        "name": "validationID",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
       }
     ],
     "anonymous": false

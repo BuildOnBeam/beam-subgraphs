@@ -29,6 +29,7 @@ type Validation @entity {
     delegationFeeBips: BigInt!
     initiateRegistrationTx: Bytes
     completeRegistrationTx: Bytes
+    unlocked: Boolean!
 }
 
 type Delegation @entity {
@@ -44,6 +45,7 @@ type Delegation @entity {
     tokenIDs: [BigInt!]
     initiateRegistrationTx: Bytes
     completeRegistrationTx: Bytes
+    unlocked: Boolean!
 }
 
 type UptimeUpdate @entity {
@@ -53,7 +55,13 @@ type UptimeUpdate @entity {
     epoch: BigInt!
 }
 
-type RegisteredRewards @entity {
+type ResolvedReward @entity {
+    id: Bytes!
+    delegationID: Bytes!
+    epoch: BigInt!
+}
+
+type RegisteredReward @entity {
     id: Bytes!
     epoch: BigInt!
     primary: Boolean!
@@ -61,7 +69,7 @@ type RegisteredRewards @entity {
     amounts: [BigInt!]
 }
 
-type ClaimedRewards @entity {
+type ClaimedReward @entity {
     id: Bytes!
     epoch: BigInt!
     primary: Boolean!
