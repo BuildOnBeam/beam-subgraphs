@@ -183,7 +183,7 @@ export function handleRewardResolved(event: RewardResolved): void {
     entity.save()
 }
 
-export function handlehandleUnlockedDelegation(event: UnlockedDelegation): void {
+export function handleUnlockedDelegation(event: UnlockedDelegation): void {
     let entity = getOrCreateDelegation(event.params.delegationID)
 
     entity.unlocked = true;
