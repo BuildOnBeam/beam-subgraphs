@@ -133,19 +133,25 @@ export function handleInitiatedDelegatorRemoval(event: InitiatedDelegatorRemoval
 
     entity.endTime = event.block.timestamp.toI64()
     entity.status = "PendingRemoved"
-    entity.save()
 
     if(entity.tokenIDs != null){
+        entity.status = "Removed"
+
         let validation = getOrCreateValidation(entity.validationID)
         validation.totalTokens = validation.totalTokens.minus(BigInt.fromI32(entity.tokenIDs!.length)) 
         validation.save()
     }
+    entity.save()
 }
 
 export function handleCompletedDelegatorRemoval(event: CompletedDelegatorRemoval): void {
     let entity = getOrCreateDelegation(event.params.delegationID)
 
     entity.status = "Removed"
+
+    if(entity.tokenIDs != null){
+        entity.unlocked = true;
+    }
     entity.save()
 }
 
@@ -190,7 +196,7 @@ export function handleUnlockedDelegation(event: UnlockedDelegation): void {
     entity.save()
 }
 
-export function handlehandleUnlockedValidation(event: UnlockedValidation): void {
+export function handleUnlockedValidation(event: UnlockedValidation): void {
     let entity = getOrCreateValidation(event.params.validationID)
 
     entity.unlocked = true;
