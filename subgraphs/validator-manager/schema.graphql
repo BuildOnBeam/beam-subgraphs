@@ -66,7 +66,7 @@ type RegisteredReward @entity {
     primary: Boolean!
     tokens: [Bytes!]
     amounts: [BigInt!]
-    timestamps: [Timestamp!]
+    timestamps: [BigInt!]
 }
 
 type ClaimedReward @entity {
