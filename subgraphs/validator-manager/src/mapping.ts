@@ -245,24 +245,17 @@ export function handleRewardRegistered(event: RewardRegistered): void {
     entity.epoch = event.params.epoch
     entity.primary = event.params.primary
 
-    var present = false
-    for(var i=0; i<entity.tokens!.length; i++){
-        if(entity.tokens![i] == event.params.token){
-            entity.amounts![i] = entity.amounts![i].plus(event.params.amount)
-            present = true
-            break
-        }
-    }
+    let tokens = entity.tokens!
+    tokens.push(event.params.token)
+    entity.tokens = tokens
 
-    if(!present){
-        let tokens = entity.tokens!
-        tokens.push(event.params.token)
-        entity.tokens = tokens
+    let amounts = entity.amounts!
+    amounts.push(event.params.amount)
+    entity.amounts = amounts
 
-        let amounts = entity.amounts!
-        amounts.push(event.params.amount)
-        entity.amounts = amounts
-    }
+    let timestamps = entity.timestamps!
+    timestamps.push(event.block.timestamp)
+    entity.timestamps = timestamps
 
     entity.save()
 }
@@ -280,7 +273,6 @@ export function handleRewardCancelled(event: RewardCancelled): void {
     for(var i=0; i<entity.tokens!.length; i++){
         if(entity.tokens![i] == event.params.token){
             entity.amounts![i] = BigInt.zero()
-            break
         }
     }
 
@@ -339,6 +331,7 @@ function getOrCreateRegisteredReward(id: Bytes): RegisteredReward {
         entity.primary = true
         entity.tokens = []
         entity.amounts = []
+        entity.timestamps = []
     }
     return entity;
 }
