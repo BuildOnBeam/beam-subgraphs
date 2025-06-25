@@ -72,6 +72,10 @@ export function handleInitiatedValidatorRegistration(
     ? decoded.toTuple()[5].toBigInt()
     : new BigInt(10000);
 
+  entity.minStakeDuration = decoded
+    ? decoded.toTuple()[6].toBigInt()
+    : BigInt.zero();
+
   entity.save();
 }
 
@@ -327,6 +331,7 @@ function getOrCreateValidation(id: Bytes): Validation {
     entity.tokenIDs = [];
     entity.totalTokens = BigInt.zero();
     entity.delegationFeeBips = BigInt.zero();
+    entity.minStakeDuration = BigInt.zero();
     entity.unlocked = false;
     entity.initialWeight = BigInt.zero();
   }
