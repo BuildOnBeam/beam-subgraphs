@@ -27,6 +27,7 @@ type Validation @entity {
     tokenIDs: [BigInt!]
     totalTokens: BigInt!
     delegationFeeBips: BigInt!
+    minStakeDuration: BigInt!
     initiateRegistrationTx: Bytes
     completeRegistrationTx: Bytes
     initiateRemovalTx: Bytes
