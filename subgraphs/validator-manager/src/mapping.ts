@@ -27,7 +27,7 @@ import {
   RegisteredReward,
   ClaimedReward,
 } from "../generated/schema";
-import { Bytes, BigInt, Address, ethereum } from "@graphprotocol/graph-ts";
+import { Bytes, BigInt, Address, ethereum, log } from "@graphprotocol/graph-ts";
 
 export function handleInitiatedValidatorRegistration(
   event: InitiatedValidatorRegistration
@@ -121,6 +121,17 @@ export function handleCompletedValidatorRemoval(
 
   entity.status = "Removed";
   entity.completeRemovalTx = event.transaction.hash;
+
+  entity.weight = entity.weight.minus(entity.initialWeight);
+
+  if (entity.weight.lt(BigInt.zero())) {
+    log.warning(
+      "Validator {} weight dropped below zero after self-stake removal. Forcing to zero.",
+      [entity.id.toHexString()]
+    );
+    entity.weight = BigInt.zero();
+  }
+
   entity.save();
 }
 
@@ -179,18 +190,35 @@ export function handleCompletedDelegatorRemoval(
 ): void {
   let entity = getOrCreateDelegation(event.params.delegationID);
 
+  if (entity.status == "Removed" && entity.processedRemoval) {
+    return;
+  }
+
   entity.status = "Removed";
   entity.completeRemovalTx = event.transaction.hash;
+  entity.unlocked = true;
+  entity.processedRemoval = true;
 
-  if (entity.tokenIDs != null) {
-    let validation = getOrCreateValidation(entity.validationID);
-    validation.totalTokens = validation.totalTokens.minus(
-      BigInt.fromI32(entity.tokenIDs!.length)
+  const validation = getOrCreateValidation(entity.validationID);
+
+  let newWeight = validation.weight.minus(entity.weight);
+  if (newWeight.lt(BigInt.zero())) {
+    log.warning(
+      "Validator {} weight dropped below 0 after removing delegation {}. Forcing to zero.",
+      [validation.id.toHexString(), entity.id.toHexString()]
     );
-    validation.save();
-
-    entity.unlocked = true;
+    newWeight = BigInt.zero();
   }
+  validation.weight = newWeight;
+
+  const tokenIDs = entity.tokenIDs;
+  if (tokenIDs !== null && tokenIDs.length > 0) {
+    validation.totalTokens = validation.totalTokens.minus(
+      BigInt.fromI32(tokenIDs.length)
+    );
+  }
+
+  validation.save();
   entity.save();
 }
 
@@ -349,6 +377,7 @@ function getOrCreateDelegation(id: Bytes): Delegation {
     entity.status = "Unknown";
     entity.unlocked = false;
     entity.lastRewardedEpoch = BigInt.zero();
+    entity.processedRemoval = false;
   }
   return entity;
 }
