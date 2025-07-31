@@ -1,82 +1,83 @@
 enum ValidatorStatus {
-    Unknown,
-    PendingAdded,
-    Active,
-    PendingRemoved,
-    Completed,
-    Invalidated,
-    Removed
+  Unknown
+  PendingAdded
+  Active
+  PendingRemoved
+  Completed
+  Invalidated
+  Removed
 }
 
 enum DelegatorStatus {
-    Unknown,
-    PendingAdded,
-    Active,
-    PendingRemoved,
-    Removed
+  Unknown
+  PendingAdded
+  Active
+  PendingRemoved
+  Removed
 }
 
 type Validation @entity {
-    id: Bytes!
-    nodeID: Bytes!
-    owner: Bytes!
-    weight: BigInt!
-    status: ValidatorStatus!
-    startedAt: Timestamp
-    endTime: Timestamp
-    tokenIDs: [BigInt!]
-    totalTokens: BigInt!
-    delegationFeeBips: BigInt!
-    minStakeDuration: BigInt!
-    initiateRegistrationTx: Bytes
-    completeRegistrationTx: Bytes
-    initiateRemovalTx: Bytes
-    completeRemovalTx: Bytes
-    unlocked: Boolean!
-    initialWeight: BigInt!
+  id: Bytes!
+  nodeID: Bytes!
+  owner: Bytes!
+  weight: BigInt!
+  status: ValidatorStatus!
+  startedAt: Timestamp
+  endTime: Timestamp
+  tokenIDs: [BigInt!]
+  totalTokens: BigInt!
+  delegationFeeBips: BigInt!
+  minStakeDuration: BigInt!
+  initiateRegistrationTx: Bytes
+  completeRegistrationTx: Bytes
+  initiateRemovalTx: Bytes
+  completeRemovalTx: Bytes
+  unlocked: Boolean!
+  initialWeight: BigInt!
 }
 
 type Delegation @entity {
-    id: Bytes!
-    validationID: Bytes!
-    validationNodeID: Bytes!
-    owner: Bytes!
-    weight: BigInt!
-    status: DelegatorStatus!
-    startedAt: Timestamp
-    endTime: Timestamp
-    # none if the delegation is a regular delegation (not NFT delegation)
-    tokenIDs: [BigInt!]
-    initiateRegistrationTx: Bytes
-    completeRegistrationTx: Bytes
-    initiateRemovalTx: Bytes
-    completeRemovalTx: Bytes
-    unlocked: Boolean!
-    lastRewardedEpoch: BigInt!
+  id: Bytes!
+  validationID: Bytes!
+  validationNodeID: Bytes!
+  owner: Bytes!
+  weight: BigInt!
+  status: DelegatorStatus!
+  startedAt: Timestamp
+  endTime: Timestamp
+  # none if the delegation is a regular delegation (not NFT delegation)
+  tokenIDs: [BigInt!]
+  initiateRegistrationTx: Bytes
+  completeRegistrationTx: Bytes
+  initiateRemovalTx: Bytes
+  completeRemovalTx: Bytes
+  unlocked: Boolean!
+  lastRewardedEpoch: BigInt!
+  processedRemoval: Boolean!
 }
 
 type UptimeUpdate @entity {
-    id: Bytes!
-    validationID: Bytes!
-    uptimeSeconds: BigInt!
-    epoch: BigInt!
+  id: Bytes!
+  validationID: Bytes!
+  uptimeSeconds: BigInt!
+  epoch: BigInt!
 }
 
 type RegisteredReward @entity {
-    id: Bytes!
-    epoch: BigInt!
-    primary: Boolean!
-    tokens: [Bytes!]
-    amounts: [BigInt!]
-    timestamps: [BigInt!]
+  id: Bytes!
+  epoch: BigInt!
+  primary: Boolean!
+  tokens: [Bytes!]
+  amounts: [BigInt!]
+  timestamps: [BigInt!]
 }
 
 type ClaimedReward @entity {
-    id: Bytes!
-    epoch: BigInt!
-    primary: Boolean!
-    account: Bytes!
-    tokens: [Bytes!]
-    amounts: [BigInt!]
-    timestamp: BigInt!
+  id: Bytes!
+  epoch: BigInt!
+  primary: Boolean!
+  account: Bytes!
+  tokens: [Bytes!]
+  amounts: [BigInt!]
+  timestamp: BigInt!
 }
