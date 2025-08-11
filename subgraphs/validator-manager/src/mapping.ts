@@ -1,5 +1,3 @@
-// subgraphs/validator-manager/src/mapping.ts
-
 import {
   InitiatedValidatorRegistration,
   InitiatedValidatorRemoval,
@@ -31,10 +29,6 @@ import {
 } from "../generated/schema";
 import { Bytes, BigInt, Address, ethereum } from "@graphprotocol/graph-ts";
 
-// ----------------------
-// Validator lifecycle
-// ----------------------
-
 export function handleInitiatedValidatorRegistration(
   event: InitiatedValidatorRegistration
 ): void {
@@ -42,12 +36,11 @@ export function handleInitiatedValidatorRegistration(
 
   entity.nodeID = event.params.nodeID;
   entity.owner = event.transaction.from;
-  entity.weight = event.params.weight; // BEAM at registration
-  entity.initialWeight = event.params.weight; // snapshot of self BEAM at registration
+  entity.weight = event.params.weight;
+  entity.initialWeight = event.params.weight;
   entity.status = "PendingAdded";
   entity.initiateRegistrationTx = event.transaction.hash;
 
-  // === NFT logic (unchanged) ===
   for (let i = 0; i < event.receipt!.logs.length; i++) {
     const eventLog = event.receipt!.logs[i];
     if (
@@ -60,23 +53,9 @@ export function handleInitiatedValidatorRegistration(
     }
   }
   entity.totalTokens = BigInt.fromI32(entity.tokenIDs!.length);
-  // === /NFT logic ===
 
-  // Decode initiateValidatorRegistration args (no fake offset)
-  const paramsHex = event.transaction.input.toHexString().slice(10); // strip selector
-  const paramsBytes = Bytes.fromHexString(paramsHex);
-  const decoded = ethereum.decode(
-    "(bytes,bytes,uint64,(uint32,address[]),(uint32,address[]),uint16,uint64,uint256[])",
-    paramsBytes
-  );
-
-  entity.delegationFeeBips = decoded
-    ? decoded.toTuple()[5].toBigInt()
-    : BigInt.fromI32(10000);
-
-  entity.minStakeDuration = decoded
-    ? decoded.toTuple()[6].toBigInt()
-    : BigInt.zero();
+  entity.delegationFeeBips = BigInt.fromI32(10000);
+  entity.minStakeDuration = BigInt.zero();
 
   entity.save();
 }
@@ -138,12 +117,7 @@ export function handleCompletedValidatorWeightUpdate(
     entity.weight = event.params.weight;
     entity.save();
   }
-  // If event.params.weight < entity.weight, ignore here; subtract later at unlock.
 }
-
-// ----------------------
-// Delegation lifecycle
-// ----------------------
 
 export function handleInitiatedDelegatorRegistration(
   event: InitiatedDelegatorRegistration
@@ -154,7 +128,7 @@ export function handleInitiatedDelegatorRegistration(
   entity.validationID = validation.id;
   entity.validationNodeID = validation.nodeID;
   entity.owner = event.params.delegatorAddress;
-  entity.weight = event.params.delegatorWeight; // BEAM delegation weight (if BEAM)
+  entity.weight = event.params.delegatorWeight;
   entity.status = "PendingAdded";
   entity.initiateRegistrationTx = event.transaction.hash;
   entity.save();
@@ -180,11 +154,9 @@ export function handleInitiatedDelegatorRemoval(
   entity.status = "PendingRemoved";
   entity.initiateRemovalTx = event.transaction.hash;
 
-  // === NFT logic (unchanged) ===
   if (entity.tokenIDs != null) {
     entity.status = "Removed";
   }
-  // === /NFT logic ===
 
   entity.save();
 }
@@ -197,8 +169,7 @@ export function handleCompletedDelegatorRemoval(
   entity.status = "Removed";
   entity.completeRemovalTx = event.transaction.hash;
 
-  // === NFT logic (unchanged) ===
-  if (entity.tokenIDs != null) {
+  if (!entity.unlocked && entity.tokenIDs != null) {
     let validation = getOrCreateValidation(entity.validationID);
     validation.totalTokens = validation.totalTokens.minus(
       BigInt.fromI32(entity.tokenIDs!.length)
@@ -207,7 +178,6 @@ export function handleCompletedDelegatorRemoval(
 
     entity.unlocked = true;
   }
-  // === /NFT logic ===
 
   entity.save();
 }
@@ -218,18 +188,12 @@ export function handleDelegatedNFTs(event: DelegatedNFTs): void {
   entity.tokenIDs = event.params.tokenIDs;
   entity.save();
 
-  // === NFT logic (unchanged) ===
   let validation = getOrCreateValidation(entity.validationID);
   validation.totalTokens = validation.totalTokens.plus(
     BigInt.fromI32(event.params.tokenIDs.length)
   );
   validation.save();
-  // === /NFT logic ===
 }
-
-// ----------------------
-// Uptime & rewards
-// ----------------------
 
 export function handleUptimeUpdated(event: UptimeUpdated): void {
   let entity = UptimeUpdate.load(
@@ -253,22 +217,16 @@ export function handleRewardResolved(event: RewardResolved): void {
   entity.save();
 }
 
-// ----------------------
-// Unlocks (21-day complete + claimed)
-// ----------------------
-
 export function handleUnlockedDelegation(event: UnlockedDelegation): void {
   let delegation = getOrCreateDelegation(event.params.delegationID);
   let validation = getOrCreateValidation(delegation.validationID);
 
   delegation.unlocked = true;
 
-  // Only change BEAM weight here; keep ALL NFT behavior as-is elsewhere.
   const isNFTDelegation =
     delegation.tokenIDs != null && delegation.tokenIDs!.length > 0;
 
   if (!isNFTDelegation) {
-    // BEAM claim → reduce validator.weight by EXACT delegation.weight
     validation.weight = validation.weight.minus(delegation.weight);
     validation.save();
   }
@@ -279,18 +237,24 @@ export function handleUnlockedDelegation(event: UnlockedDelegation): void {
 export function handleUnlockedValidation(event: UnlockedValidation): void {
   let validation = getOrCreateValidation(event.params.validationID);
 
+  if (
+    !validation.unlocked &&
+    validation.tokenIDs != null &&
+    validation.tokenIDs!.length > 0
+  ) {
+    validation.totalTokens = validation.totalTokens.minus(
+      BigInt.fromI32(validation.tokenIDs!.length)
+    );
+
+    // validation.tokenIDs = []; // uncomment if we want to clear self-staked list after claim
+  }
+
   validation.unlocked = true;
 
-  // Only change BEAM weight here; DO NOT touch NFTs (keep original behavior).
-  // Reduce validator.weight by EXACT self-stake recorded at registration.
   validation.weight = validation.weight.minus(validation.initialWeight);
 
   validation.save();
 }
-
-// ----------------------
-// Reward claims snapshot
-// ----------------------
 
 export function handleRewardClaimed(event: RewardClaimed): void {
   let entity = getOrCreateClaimedReward(
@@ -368,10 +332,6 @@ export function handleRewardCancelled(event: RewardCancelled): void {
   entity.save();
 }
 
-// ----------------------
-// helpers
-// ----------------------
-
 function getOrCreateValidation(id: Bytes): Validation {
   let entity = Validation.load(id);
   if (entity == null) {
@@ -400,7 +360,6 @@ function getOrCreateDelegation(id: Bytes): Delegation {
     entity.status = "Unknown";
     entity.unlocked = false;
     entity.lastRewardedEpoch = BigInt.zero();
-    // Note: keep tokenIDs uninitialized as in original (nullable) behavior
   }
   return entity;
 }
