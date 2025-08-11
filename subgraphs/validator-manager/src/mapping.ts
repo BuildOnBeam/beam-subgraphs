@@ -226,6 +226,7 @@ export function handleUptimeUpdated(event: UptimeUpdated): void {
   entity.validationID = event.params.validationID;
   entity.uptimeSeconds = event.params.uptime;
   entity.epoch = event.params.epoch;
+
   entity.save();
 }
 
@@ -344,6 +345,7 @@ export function handleRewardCancelled(event: RewardCancelled): void {
   entity.save();
 }
 
+// helper functions
 function getOrCreateValidation(id: Bytes): Validation {
   let entity = Validation.load(id);
   if (entity == null) {
