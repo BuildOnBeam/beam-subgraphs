@@ -52,7 +52,6 @@ export function handleInitiatedValidatorRegistration(
       entity.tokenIDs = tokenIDs;
     }
   }
-
   entity.totalTokens = BigInt.fromI32(entity.tokenIDs!.length);
 
   const inputDataHexString = event.transaction.input.toHexString().slice(10);
@@ -98,6 +97,7 @@ export function handleRegisteredInitialValidator(
   entity.nodeID = event.params.nodeID;
   entity.owner = Address.zero();
   entity.weight = event.params.weight;
+  entity.initialWeight = event.params.weight;
   entity.startedAt = event.block.timestamp.toI64();
   entity.status = "Active";
   entity.save();
@@ -119,6 +119,7 @@ export function handleCompletedValidatorRemoval(
 ): void {
   let entity = getOrCreateValidation(event.params.validationID);
 
+  // No BEAM reductions here; we reduce only when unlock completes.
   entity.status = "Removed";
   entity.completeRemovalTx = event.transaction.hash;
   entity.save();
@@ -129,8 +130,11 @@ export function handleCompletedValidatorWeightUpdate(
 ): void {
   let entity = getOrCreateValidation(event.params.validationID);
 
-  entity.weight = event.params.weight;
-  entity.save();
+  // Apply only increases now; defer decreases until unlock/claim.
+  if (event.params.weight.gt(entity.weight)) {
+    entity.weight = event.params.weight;
+    entity.save();
+  }
 }
 
 export function handleInitiatedDelegatorRegistration(
@@ -171,6 +175,7 @@ export function handleInitiatedDelegatorRemoval(
   if (entity.tokenIDs != null) {
     entity.status = "Removed";
   }
+
   entity.save();
 }
 
@@ -182,7 +187,7 @@ export function handleCompletedDelegatorRemoval(
   entity.status = "Removed";
   entity.completeRemovalTx = event.transaction.hash;
 
-  if (entity.tokenIDs != null) {
+  if (!entity.unlocked && entity.tokenIDs != null) {
     let validation = getOrCreateValidation(entity.validationID);
     validation.totalTokens = validation.totalTokens.minus(
       BigInt.fromI32(entity.tokenIDs!.length)
@@ -191,6 +196,7 @@ export function handleCompletedDelegatorRemoval(
 
     entity.unlocked = true;
   }
+
   entity.save();
 }
 
@@ -220,28 +226,47 @@ export function handleUptimeUpdated(event: UptimeUpdated): void {
   entity.validationID = event.params.validationID;
   entity.uptimeSeconds = event.params.uptime;
   entity.epoch = event.params.epoch;
+
   entity.save();
 }
 
 export function handleRewardResolved(event: RewardResolved): void {
   let entity = getOrCreateDelegation(event.params.delegationID);
   entity.lastRewardedEpoch = event.params.epoch;
-
   entity.save();
 }
 
 export function handleUnlockedDelegation(event: UnlockedDelegation): void {
-  let entity = getOrCreateDelegation(event.params.delegationID);
+  let delegation = getOrCreateDelegation(event.params.delegationID);
+  let validation = getOrCreateValidation(delegation.validationID);
 
-  entity.unlocked = true;
-  entity.save();
+  if (!delegation.unlocked) {
+    const isNFT =
+      delegation.tokenIDs != null && delegation.tokenIDs!.length > 0;
+    if (!isNFT) {
+      validation.weight = validation.weight.minus(delegation.weight);
+      validation.save();
+    }
+    delegation.unlocked = true;
+    delegation.save();
+  }
 }
 
 export function handleUnlockedValidation(event: UnlockedValidation): void {
-  let entity = getOrCreateValidation(event.params.validationID);
+  let validation = getOrCreateValidation(event.params.validationID);
 
-  entity.unlocked = true;
-  entity.save();
+  if (!validation.unlocked) {
+    if (validation.tokenIDs != null && validation.tokenIDs!.length > 0) {
+      validation.totalTokens = validation.totalTokens.minus(
+        BigInt.fromI32(validation.tokenIDs!.length)
+      );
+    }
+
+    validation.weight = validation.weight.minus(validation.initialWeight);
+    validation.unlocked = true;
+    validation.save();
+    return;
+  }
 }
 
 export function handleRewardClaimed(event: RewardClaimed): void {
