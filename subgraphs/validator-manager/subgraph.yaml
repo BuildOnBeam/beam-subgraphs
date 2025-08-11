@@ -8,11 +8,11 @@ indexerHints:
 dataSources:
   - kind: ethereum/contract
     name: ValidatorManager
-    network: beam-testnet
+    network: beam
     source:
       abi: ValidatorManager
-      address: "0x33B9785E20ec582d5009965FB3346F1716e8A423"
-      startBlock: 1186013
+      address: "0x46d5a1B62095cE9497C6Cc7Ab1BDb8a09D7e3c36"
+      startBlock: 3697229
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -40,11 +40,11 @@ dataSources:
       file: ./src/mapping.ts
   - kind: ethereum/contract
     name: Native721TokenStakingManager
-    network: beam-testnet
+    network: beam
     source:
       abi: Native721TokenStakingManager
-      address: "0xF4B5869AabE19a106C0df25E1537d855b54EEcBD"
-      startBlock: 1202461
+      address: "0x2FD428A5484d113294b44E69Cb9f269abC1d5B54"
+      startBlock: 3697236
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
