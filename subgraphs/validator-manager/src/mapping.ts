@@ -54,8 +54,26 @@ export function handleInitiatedValidatorRegistration(
   }
   entity.totalTokens = BigInt.fromI32(entity.tokenIDs!.length);
 
-  entity.delegationFeeBips = BigInt.fromI32(10000);
-  entity.minStakeDuration = BigInt.zero();
+  const inputDataHexString = event.transaction.input.toHexString().slice(10);
+  const hexStringToDecode =
+    "0x0000000000000000000000000000000000000000000000000000000000000020" +
+    inputDataHexString;
+  const dataToDecode = Bytes.fromByteArray(
+    Bytes.fromHexString(hexStringToDecode)
+  );
+
+  const decoded = ethereum.decode(
+    "(bytes,bytes,uint64,(uint32,address[]),(uint32,address[]),uint16,uint64,uint256[])",
+    dataToDecode
+  );
+
+  entity.delegationFeeBips = decoded
+    ? decoded.toTuple()[5].toBigInt()
+    : new BigInt(10000);
+
+  entity.minStakeDuration = decoded
+    ? decoded.toTuple()[6].toBigInt()
+    : BigInt.zero();
 
   entity.save();
 }
@@ -221,39 +239,33 @@ export function handleUnlockedDelegation(event: UnlockedDelegation): void {
   let delegation = getOrCreateDelegation(event.params.delegationID);
   let validation = getOrCreateValidation(delegation.validationID);
 
-  delegation.unlocked = true;
-
-  const isNFTDelegation =
-    delegation.tokenIDs != null && delegation.tokenIDs!.length > 0;
-
-  if (!isNFTDelegation) {
-    validation.weight = validation.weight.minus(delegation.weight);
-    validation.save();
+  if (!delegation.unlocked) {
+    const isNFT =
+      delegation.tokenIDs != null && delegation.tokenIDs!.length > 0;
+    if (!isNFT) {
+      validation.weight = validation.weight.minus(delegation.weight);
+      validation.save();
+    }
+    delegation.unlocked = true;
+    delegation.save();
   }
-
-  delegation.save();
 }
 
 export function handleUnlockedValidation(event: UnlockedValidation): void {
   let validation = getOrCreateValidation(event.params.validationID);
 
-  if (
-    !validation.unlocked &&
-    validation.tokenIDs != null &&
-    validation.tokenIDs!.length > 0
-  ) {
-    validation.totalTokens = validation.totalTokens.minus(
-      BigInt.fromI32(validation.tokenIDs!.length)
-    );
+  if (!validation.unlocked) {
+    if (validation.tokenIDs != null && validation.tokenIDs!.length > 0) {
+      validation.totalTokens = validation.totalTokens.minus(
+        BigInt.fromI32(validation.tokenIDs!.length)
+      );
+    }
 
-    // validation.tokenIDs = []; // uncomment if we want to clear self-staked list after claim
+    validation.weight = validation.weight.minus(validation.initialWeight);
+    validation.unlocked = true;
+    validation.save();
+    return;
   }
-
-  validation.unlocked = true;
-
-  validation.weight = validation.weight.minus(validation.initialWeight);
-
-  validation.save();
 }
 
 export function handleRewardClaimed(event: RewardClaimed): void {
