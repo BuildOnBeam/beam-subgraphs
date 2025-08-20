@@ -243,7 +243,7 @@ export function handleUnlockedDelegation(event: UnlockedDelegation): void {
   if (!delegation.unlocked) {
     const isNFT =
       delegation.tokenIDs != null && delegation.tokenIDs!.length > 0;
-    if (!isNFT) {
+    if (!isNFT && !validation.unlocked) {
       validation.weight = validation.weight.minus(delegation.weight);
       validation.save();
     }
@@ -262,7 +262,7 @@ export function handleUnlockedValidation(event: UnlockedValidation): void {
       );
     }
 
-    validation.weight = validation.weight.minus(validation.initialWeight);
+    validation.weight = BigInt.zero();
     validation.unlocked = true;
     validation.save();
     return;
