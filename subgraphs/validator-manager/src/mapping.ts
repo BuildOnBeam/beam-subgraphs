@@ -130,11 +130,8 @@ export function handleCompletedValidatorWeightUpdate(
 ): void {
   let entity = getOrCreateValidation(event.params.validationID);
 
-  // Apply only increases now; defer decreases until unlock/claim.
-  if (event.params.weight.gt(entity.weight)) {
-    entity.weight = event.params.weight;
-    entity.save();
-  }
+  entity.weight = event.params.weight;
+  entity.save();
 }
 
 export function handleInitiatedDelegatorRegistration(
@@ -238,18 +235,9 @@ export function handleRewardResolved(event: RewardResolved): void {
 
 export function handleUnlockedDelegation(event: UnlockedDelegation): void {
   let delegation = getOrCreateDelegation(event.params.delegationID);
-  let validation = getOrCreateValidation(delegation.validationID);
 
-  if (!delegation.unlocked) {
-    const isNFT =
-      delegation.tokenIDs != null && delegation.tokenIDs!.length > 0;
-    if (!isNFT) {
-      validation.weight = validation.weight.minus(delegation.weight);
-      validation.save();
-    }
-    delegation.unlocked = true;
-    delegation.save();
-  }
+  delegation.unlocked = true;
+  delegation.save();
 }
 
 export function handleUnlockedValidation(event: UnlockedValidation): void {
