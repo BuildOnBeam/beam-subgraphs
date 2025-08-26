@@ -69,7 +69,7 @@ export function handleInitiatedValidatorRegistration(
 
   entity.delegationFeeBips = decoded
     ? decoded.toTuple()[5].toBigInt()
-    : new BigInt(10000);
+    : BigInt.fromI32(10_000);
 
   entity.minStakeDuration = decoded
     ? decoded.toTuple()[6].toBigInt()
@@ -244,7 +244,11 @@ export function handleUnlockedDelegation(event: UnlockedDelegation): void {
     const isNFT =
       delegation.tokenIDs != null && delegation.tokenIDs!.length > 0;
     if (!isNFT) {
-      validation.weight = validation.weight.minus(delegation.weight);
+      let next = validation.weight.minus(delegation.weight);
+      if (next.lt(BigInt.zero())) {
+        next = BigInt.zero();
+      }
+      validation.weight = next;
       validation.save();
     }
     delegation.unlocked = true;
@@ -262,7 +266,12 @@ export function handleUnlockedValidation(event: UnlockedValidation): void {
       );
     }
 
-    validation.weight = validation.weight.minus(validation.initialWeight);
+    let next = validation.weight.minus(validation.initialWeight);
+    if (next.lt(BigInt.zero())) {
+      next = BigInt.zero();
+    }
+    validation.weight = next;
+
     validation.unlocked = true;
     validation.save();
     return;
