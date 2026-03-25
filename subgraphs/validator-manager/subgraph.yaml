@@ -82,4 +82,6 @@ dataSources:
           handler: handleUnlockedValidation
         - event: UnlockedDelegation(indexed bytes32)
           handler: handleUnlockedDelegation
+        - event: ValidatorNFTsUnlocked(indexed bytes32,uint256)
+          handler: handleValidatorNFTsUnlocked
       file: ./src/mapping.ts

@@ -1,6 +1,6 @@
 {
   "name": "@beam/subgraph-validator-manager",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
@@ -14,7 +14,8 @@
     "build:test": "graph build --network beam-testnet",
     "index:test": "graph create pos-testnet --node https://graph.onbeam.com/admin",
     "deploy:test": "graph deploy pos-testnet --node https://graph.onbeam.com/admin --ipfs https://ipfs.onbeam.com --network beam-testnet --version-label v0.1.0",
-    "all:beta": "yarn codegen && yarn build:test && yarn index:beta-test && yarn deploy:beta-test && yarn build && yarn index:beta && yarn deploy:beta",
+    "all:beta": "yarn codegen && yarn build && yarn index:beta && yarn deploy:beta",
+    "all:beta-test": "yarn codegen && yarn build:test && yarn index:beta-test && yarn deploy:beta-test",
     "index:beta-test": "graph create pos-testnet-beta --node https://graph.onbeam.com/admin",
     "deploy:beta-test": "graph deploy pos-testnet-beta --node https://graph.onbeam.com/admin --ipfs https://ipfs.onbeam.com --network beam-testnet --version-label v0.1.0",
     "index:beta": "graph create pos-beta --node https://graph.onbeam.com/admin",

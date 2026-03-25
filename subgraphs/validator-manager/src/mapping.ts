@@ -19,6 +19,7 @@ import {
   RewardResolved,
   UnlockedDelegation,
   UnlockedValidation,
+  ValidatorNFTsUnlocked,
 } from "../generated/Native721TokenStakingManager/Native721TokenStakingManager";
 import {
   Validation,
@@ -276,6 +277,21 @@ export function handleUnlockedValidation(event: UnlockedValidation): void {
     validation.save();
     return;
   }
+}
+
+export function handleValidatorNFTsUnlocked(
+  event: ValidatorNFTsUnlocked,
+): void {
+  let validation = getOrCreateValidation(event.params.validationID);
+
+  if (validation.tokenIDs != null && validation.tokenIDs!.length > 0) {
+    validation.totalTokens = validation.totalTokens.minus(
+      BigInt.fromI32(validation.tokenIDs!.length),
+    );
+    validation.tokenIDs = [];
+  }
+
+  validation.save();
 }
 
 export function handleRewardClaimed(event: RewardClaimed): void {
