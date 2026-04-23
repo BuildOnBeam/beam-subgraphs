@@ -284,7 +284,11 @@ export function handleValidatorNFTsUnlocked(
 ): void {
   let validation = getOrCreateValidation(event.params.validationID);
 
-  if (validation.tokenIDs != null && validation.tokenIDs!.length > 0) {
+  if (
+    validation.tokenIDs != null &&
+    validation.tokenIDs!.length > 0 &&
+    !validation.unlocked
+  ) {
     validation.totalTokens = validation.totalTokens.minus(
       BigInt.fromI32(validation.tokenIDs!.length),
     );
